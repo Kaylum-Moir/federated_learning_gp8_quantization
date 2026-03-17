@@ -1,0 +1,25 @@
+# Virtual environment
+fl_env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Data files
+data/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Plot outputs
+*.png
+
+# VS Code settings (optional)
+.vscode/

@@ -2,23 +2,19 @@ import flwr as fl
 import torch
 from model import Net
 
-
 ALPHA = 0.000001
 BETA = 0.0000005
 
 
 class FlowerClient(fl.client.NumPyClient):
 
-    def __init__(self, trainloader):
+    def __init__(self, trainloader, device_profile):
 
         self.model = Net()
         self.trainloader = trainloader
-
-        self.compute_energy = 0
-        self.comm_energy = 0
+        self.profile = device_profile
 
     def get_parameters(self, config):
-
         return [val.cpu().numpy() for val in self.model.state_dict().values()]
 
     def set_parameters(self, parameters):
@@ -53,19 +49,30 @@ class FlowerClient(fl.client.NumPyClient):
 
             training_steps += 1
 
-        # compute energy
-        cpu_cycles = training_steps * 1000
+        # --------------------
+        # Computation Energy
+        # --------------------
+
+        cpu_cycles = training_steps * self.profile["cpu_factor"] * 1000
         compute_energy = cpu_cycles * ALPHA
 
-        # communication energy
-        model_size = sum(p.numel() for p in self.model.parameters())
-        comm_energy = model_size * BETA
+        # --------------------
+        # Communication Energy
+        # --------------------
 
-        total_energy = compute_energy + comm_energy
+        model_size = sum(p.numel() for p in self.model.parameters())
+
+        compression = self.profile["compression"]
+
+        transmitted_params = model_size * compression
+
+        communication_energy = transmitted_params * BETA
+
+        total_energy = compute_energy + communication_energy
 
         metrics = {
             "compute_energy": compute_energy,
-            "comm_energy": comm_energy,
+            "communication_energy": communication_energy,
             "total_energy": total_energy,
         }
 
