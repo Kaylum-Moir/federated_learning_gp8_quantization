@@ -15,7 +15,7 @@ NUM_ROUNDS = 100
 CLIENTS_PER_ROUND = 10
 
 MODE = "proposed"  # change to "baseline" or "proposed"
-
+USE_QUANTIZATION = False
 
 client_stats = {}
 
@@ -82,7 +82,7 @@ def evaluate(server_round, parameters, config):
 
 # ------------------ CLIENT FN ------------------
 def client_fn(cid: str):
-    return FlowerClient(trainloaders[int(cid)], client_profiles[int(cid)])
+    return FlowerClient(trainloaders[int(cid)], client_profiles[int(cid)], use_quantization=USE_QUANTIZATION)
 
 
 # ------------------ SCORE ------------------
