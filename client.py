@@ -75,12 +75,10 @@ class FlowerClient(fl.client.NumPyClient):
 
         model_size = sum(p.numel() for p in self.model.parameters())
 
-        if self.use_quantization:
-            bits_per_param = 16
-        else:
-            bits_per_param = 32
+        width = 16 if self.use_quantization else 32
+        quantization_factor = width / 32.0
 
-        transmitted_params = model_size * self.profile["compression"] * bits_per_param
+        transmitted_params = model_size * self.profile["compression"] * quantization_factor
         communication_energy = transmitted_params * BETA
 
         total_energy = compute_energy + communication_energy
